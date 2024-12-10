@@ -6,6 +6,11 @@ def get_user_command():
     return inp
 
 def handle_command(inp):
+    match inp:
+        case "exit 0":
+            sys.exit(0)
+            return
+
     print(f'{inp}: command not found')
 
 def main():
