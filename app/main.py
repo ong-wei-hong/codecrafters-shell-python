@@ -2,16 +2,19 @@ import sys
 
 def get_user_command():
     sys.stdout.write("$ ")
-    inp = input()
+    inp = input().split(' ')
     return inp
 
 def handle_command(inp):
     match inp:
-        case "exit 0":
+        case ['exit', '0']:
             sys.exit(0)
-            return
 
-    print(f'{inp}: command not found')
+        case ['echo', *args]:
+            sys.stdout.write(' '.join(args) + '\n')
+        
+        case _:
+            sys.stdout.write(f'{' '.join(inp)}: command not found\n')
 
 def main():
     # Uncomment this block to pass the first stage
@@ -19,8 +22,6 @@ def main():
     while True:
         inp = get_user_command()
         handle_command(inp)
-
-
 
 if __name__ == "__main__":
     main()
