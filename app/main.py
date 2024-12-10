@@ -11,8 +11,9 @@ def handle_command(inp):
 def main():
     # Uncomment this block to pass the first stage
     # Wait for user input
-    inp = get_user_command()
-    handle_command(inp)
+    while True:
+        inp = get_user_command()
+        handle_command(inp)
 
 
 
