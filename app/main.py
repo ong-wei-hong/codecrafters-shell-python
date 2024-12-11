@@ -12,6 +12,12 @@ def handle_command(inp):
 
         case ['echo', *args]:
             sys.stdout.write(' '.join(args) + '\n')
+
+        case ['type', arg]:
+            if arg in ['type', 'exit', 'echo']:
+                sys.stdout.write(f'{arg} is a shell builtin\n')
+            else:
+                sys.stdout.write(f'{arg}: not found\n')
         
         case _:
             sys.stdout.write(f'{' '.join(inp)}: command not found\n')
