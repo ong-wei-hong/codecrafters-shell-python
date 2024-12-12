@@ -14,7 +14,7 @@ def get_file(dirs, filename):
             return filepath
     return None
 
-def handle_command(inp,dirs):
+def handle_command(inp,dirs,HOME):
     match inp:
         case ['exit', '0']:
             sys.exit(0)
@@ -32,6 +32,9 @@ def handle_command(inp,dirs):
 
         case ['pwd']:
             sys.stdout.write(f'{os.getcwd()}\n')
+        
+        case ['cd', '~']:
+            os.chdir(HOME)
 
         case ['cd', path]:
             if os.path.isdir(path):
@@ -45,14 +48,15 @@ def handle_command(inp,dirs):
             else:
                 sys.stdout.write(f'{' '.join(inp)}: command not found\n')
 
-def main(dirs):
+def main(dirs,HOME):
     # Uncomment this block to pass the first stage
     # Wait for user input
     while True:
         inp = get_user_command()
-        handle_command(inp,dirs)
+        handle_command(inp,dirs,HOME)
 
 if __name__ == "__main__":
     PATH = os.environ.get("PATH")
     dirs = PATH.split(':')
-    main(dirs)
+    HOME = os.environ.get("HOME")
+    main(dirs, HOME)
