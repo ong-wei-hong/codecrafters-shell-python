@@ -14,7 +14,7 @@ def get_file(dirs, filename):
             return filepath
     return None
 
-def handle_command(inp,dirs,curr_dir):
+def handle_command(inp,dirs):
     match inp:
         case ['exit', '0']:
             sys.exit(0)
@@ -23,7 +23,7 @@ def handle_command(inp,dirs,curr_dir):
             sys.stdout.write(' '.join(args) + '\n')
 
         case ['type', arg]:
-            if arg in ['type', 'exit', 'echo', 'pwd']:
+            if arg in ['type', 'exit', 'echo', 'pwd', 'cd']:
                 sys.stdout.write(f'{arg} is a shell builtin\n')
             elif (filepath := get_file(dirs, arg)):
                 sys.stdout.write(f'{arg} is {filepath}\n')
@@ -31,7 +31,13 @@ def handle_command(inp,dirs,curr_dir):
                 sys.stdout.write(f'{arg}: not found\n')
 
         case ['pwd']:
-            sys.stdout.write(f'{curr_dir}\n')
+            sys.stdout.write(f'{os.getcwd()}\n')
+
+        case ['cd', path]:
+            if os.path.isdir(path):
+                os.chdir(path)
+            else:
+                sys.stdout.write(f'cd: {path}: No such file or directory\n')
         
         case [file, *args]:
             if (filepath := get_file(dirs, file)):
@@ -39,15 +45,14 @@ def handle_command(inp,dirs,curr_dir):
             else:
                 sys.stdout.write(f'{' '.join(inp)}: command not found\n')
 
-def main(dirs, curr_dir):
+def main(dirs):
     # Uncomment this block to pass the first stage
     # Wait for user input
     while True:
         inp = get_user_command()
-        handle_command(inp,dirs,curr_dir)
+        handle_command(inp,dirs)
 
 if __name__ == "__main__":
     PATH = os.environ.get("PATH")
     dirs = PATH.split(':')
-    curr_dir = os.getcwd()
-    main(dirs,curr_dir)
+    main(dirs)
