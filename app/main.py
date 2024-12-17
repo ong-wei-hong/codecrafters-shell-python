@@ -5,17 +5,29 @@ import subprocess
 def mysplit(input):
     res = ['']
     current_quote = ''
-    blackslash = False
-    for c in input:
-        if blackslash:
-            blackslash = False
-            res[-1] += c
-        elif c == '\\' and current_quote == '':
-            blackslash = True
-        elif c in ["'", '"']:
+
+    i=0
+    while i < len(input):
+        c = input[i]
+        if c == '\\':
+            ch = input[i+1]
+            if current_quote == "'":
+                res[-1] += c
+            elif current_quote == '"':
+                ch = input[i+1]
+                if ch in ['\\', '$', '"', '\n']:
+                    res[-1] += ch
+                else:
+                    res[-1] += '\\' + ch
+                
+                i += 1
+            else:
+                res[-1] += input[i+1]
+                i += 1
+        elif c in ['"',"'"]:
             if current_quote == '':
                 current_quote = c
-            elif c == current_quote:
+            elif current_quote == c:
                 current_quote = ''
             else:
                 res[-1] += c
@@ -25,6 +37,8 @@ def mysplit(input):
         else:
             res[-1] += c
 
+        i += 1
+        
     if res[-1] == '':
         res.pop()
 
