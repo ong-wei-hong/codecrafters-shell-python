@@ -5,8 +5,14 @@ import subprocess
 def mysplit(input):
     res = ['']
     current_quote = ''
+    blackslash = False
     for c in input:
-        if c in ["'", '"']:
+        if blackslash:
+            blackslash = False
+            res[-1] += c
+        elif c == '\\' and current_quote == '':
+            blackslash = True
+        elif c in ["'", '"']:
             if current_quote == '':
                 current_quote = c
             elif c == current_quote:
