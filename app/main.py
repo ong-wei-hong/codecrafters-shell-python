@@ -4,11 +4,16 @@ import subprocess
 
 def mysplit(input):
     res = ['']
-    single_quote = False
+    current_quote = ''
     for c in input:
-        if c == "'":
-            single_quote = not single_quote
-        elif c == ' ' and not single_quote:
+        if c in ["'", '"']:
+            if current_quote == '':
+                current_quote = c
+            elif c == current_quote:
+                current_quote = ''
+            else:
+                res[-1] += c
+        elif c == ' ' and current_quote == '':
             if res[-1] != '':
                 res.append('')
         else:
@@ -58,16 +63,7 @@ def handle_command(inp,dirs,HOME):
                 os.chdir(path)
             else:
                 sys.stdout.write(f'cd: {path}: No such file or directory\n')
-
-        # case ['cat', *args]:
-        #     for filename in args:
-        #         if not os.path.isfile(filename):
-        #             sys.stdout.write(f'cat: {filename}: No such file or directory\n')
-        #             break
-
-        #         with open(filename) as f:
-        #             sys.stdout.write(f'{f.read()}')
-        
+       
         case [file, *args]:
             if (filepath := get_file(dirs, file)):
                 subprocess.run([filepath, *args])
