@@ -46,8 +46,17 @@ def mysplit(input):
 
 def get_user_command():
     sys.stdout.write("$ ")
+    out, err = sys.stdout, sys.stderr
     inp = mysplit(input())
-    return inp
+
+    if '1>' in inp:
+        idx = inp.index('1>')
+        inp, out = inp[:idx], inp[idx+1]
+    elif '>' in inp:
+        idx = inp.index('>')
+        inp, out = inp[:idx], inp[idx+1]
+
+    return inp, out, err
 
 def get_file(dirs, filename):
     for dir in dirs:
@@ -56,24 +65,29 @@ def get_file(dirs, filename):
             return filepath
     return None
 
-def handle_command(inp,dirs,HOME):
+def handle_command(inp,dirs,HOME,out,err):
+    toCloseOut = False
+    if type(out) is str:
+        toCloseOut = True
+        out = open(out, 'w+')
+
     match inp:
         case ['exit', '0']:
             sys.exit(0)
 
         case ['echo', *args]:
-            sys.stdout.write(' '.join(args) + '\n')
+            out.write(' '.join(args) + '\n')
 
         case ['type', arg]:
             if arg in ['type', 'exit', 'echo', 'pwd', 'cd']:
-                sys.stdout.write(f'{arg} is a shell builtin\n')
+                out.write(f'{arg} is a shell builtin\n')
             elif (filepath := get_file(dirs, arg)):
-                sys.stdout.write(f'{arg} is {filepath}\n')
+                out.write(f'{arg} is {filepath}\n')
             else:
-                sys.stdout.write(f'{arg}: not found\n')
+                out.write(f'{arg}: not found\n')
 
         case ['pwd']:
-            sys.stdout.write(f'{os.getcwd()}\n')
+            out.write(f'{os.getcwd()}\n')
         
         case ['cd', '~']:
             os.chdir(HOME)
@@ -82,20 +96,23 @@ def handle_command(inp,dirs,HOME):
             if os.path.isdir(path):
                 os.chdir(path)
             else:
-                sys.stdout.write(f'cd: {path}: No such file or directory\n')
+                err.write(f'cd: {path}: No such file or directory\n')
        
         case [file, *args]:
             if (filepath := get_file(dirs, file)):
-                subprocess.run([filepath, *args])
+                subprocess.run([filepath, *args],stdout=out, stderr=err)
             else:
-                sys.stdout.write(f'{' '.join(inp)}: command not found\n')
+                err.write(f'{' '.join(inp)}: command not found\n')
+
+    if toCloseOut:
+        out.close()
 
 def main(dirs,HOME):
     # Uncomment this block to pass the first stage
     # Wait for user input
     while True:
-        inp = get_user_command()
-        handle_command(inp,dirs,HOME)
+        inp, out, err = get_user_command()
+        handle_command(inp,dirs,HOME,out,err)
 
 if __name__ == "__main__":
     PATH = os.environ.get("PATH")
