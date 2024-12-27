@@ -46,25 +46,8 @@ def mysplit(input):
 
 def get_user_command():
     sys.stdout.write("$ ")
-    out, err = sys.stdout, sys.stderr
     inp = mysplit(input())
-    inp_idx = len(inp)
-
-    if '1>' in inp:
-        inp_idx = inp.index('1>')
-        out = inp[inp_idx+1]
-    elif '>' in inp:
-        inp_idx = inp.index('>')
-        out = inp[inp_idx+1]
-
-    if '2>' in inp:
-        idx = inp.index('2>')
-        err = inp[idx+1]
-        inp_idx = min(inp_idx, idx)
-
-    inp = inp[:inp_idx]
-
-    return inp, out, err
+    return inp
 
 def get_file(dirs, filename):
     for dir in dirs:
@@ -74,15 +57,6 @@ def get_file(dirs, filename):
     return None
 
 def handle_command(inp,dirs,HOME,out,err):
-    toCloseOut, toCloseErr = False, False
-    if type(out) is str:
-        toCloseOut = True
-        out = open(out, 'w+')
-
-    if type(err) is str:
-        toCloseErr = True
-        err = open(err, 'w+')
-
     match inp:
         case ['exit', '0']:
             sys.exit(0)
@@ -116,18 +90,46 @@ def handle_command(inp,dirs,HOME,out,err):
             else:
                 err.write(f'{' '.join(inp)}: command not found\n')
 
-    if toCloseOut:
-        out.close()
-
-    if toCloseErr:
-        err.close()
-
 def main(dirs,HOME):
     # Uncomment this block to pass the first stage
     # Wait for user input
     while True:
-        inp, out, err = get_user_command()
+        inp = get_user_command()
+        inp_idx = len(inp)
+        out, err = sys.stdout, sys.stderr
+        toCloseOut, toCloseErr = False, False
+
+        if '1>' in inp:
+            inp_idx = inp.index('1>')
+            out = open(inp[inp_idx+1], 'w+')
+        elif '>' in inp:
+            inp_idx = inp.index('>')
+            out = open(inp[inp_idx+1], 'w+')
+        elif '>>' in inp:
+            inp_idx = inp.index('>>')
+            out = open(inp[inp_idx+1], 'a+')
+        elif '1>>' in inp:
+            inp_idx = inp.index('1>>')
+            out = open(inp[inp_idx+1], 'a+')
+
+        if '2>' in inp:
+            idx = inp.index('2>')
+            err = open(inp[idx+1], 'a+')
+            inp_idx = min(inp_idx, idx)
+        elif '2>>' in inp:
+            idx = inp.index('2>>')
+            err = open(inp[idx+1], 'a+')
+            inp_idx = min(inp_idx, idx)
+
+        inp = inp[:inp_idx]
+
         handle_command(inp,dirs,HOME,out,err)
+
+        if toCloseOut:
+            out.close()
+        
+        if toCloseErr:
+            err.close()
 
 if __name__ == "__main__":
     PATH = os.environ.get("PATH")
