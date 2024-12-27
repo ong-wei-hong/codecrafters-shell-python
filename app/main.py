@@ -48,13 +48,21 @@ def get_user_command():
     sys.stdout.write("$ ")
     out, err = sys.stdout, sys.stderr
     inp = mysplit(input())
+    inp_idx = len(inp)
 
     if '1>' in inp:
-        idx = inp.index('1>')
-        inp, out = inp[:idx], inp[idx+1]
+        inp_idx = inp.index('1>')
+        out = inp[inp_idx+1]
     elif '>' in inp:
-        idx = inp.index('>')
-        inp, out = inp[:idx], inp[idx+1]
+        inp_idx = inp.index('>')
+        out = inp[inp_idx+1]
+
+    if '2>' in inp:
+        idx = inp.index('2>')
+        err = inp[idx+1]
+        inp_idx = min(inp_idx, idx)
+
+    inp = inp[:inp_idx]
 
     return inp, out, err
 
@@ -66,10 +74,14 @@ def get_file(dirs, filename):
     return None
 
 def handle_command(inp,dirs,HOME,out,err):
-    toCloseOut = False
+    toCloseOut, toCloseErr = False, False
     if type(out) is str:
         toCloseOut = True
         out = open(out, 'w+')
+
+    if type(err) is str:
+        toCloseErr = True
+        err = open(err, 'w+')
 
     match inp:
         case ['exit', '0']:
@@ -106,6 +118,9 @@ def handle_command(inp,dirs,HOME,out,err):
 
     if toCloseOut:
         out.close()
+
+    if toCloseErr:
+        err.close()
 
 def main(dirs,HOME):
     # Uncomment this block to pass the first stage
